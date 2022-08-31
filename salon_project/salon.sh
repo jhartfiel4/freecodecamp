@@ -9,7 +9,7 @@ if [[ $1 ]]
     echo -e "\n$1"
   fi
 
-  echo -e "\nHere are our services:"
+  echo -e "\nWelcome to the Salon. Here are our services:"
 
   LIST_OF_SERVICES=$($PSQL "SELECT * FROM services")
   echo "$LIST_OF_SERVICES" | while read SERVICE_ID BAR NAME
@@ -19,19 +19,6 @@ if [[ $1 ]]
       echo "$SERVICE_ID) $NAME"
     fi
   done
-
-  echo -e "\nWhat would you like to do?"
-  echo -e "1) Choose a service\n2) Leave the salon"
-  read MAIN_MENU_SELECTION
-
-  case $MAIN_MENU_SELECTION in
-    1) SERVICE_MENU ;;
-    2) EXIT ;;
-    *) MAIN_MENU "Please select a valid option." ;;
-  esac
-}
-
-SERVICE_MENU(){
   
   #ask for service
   echo -e "\nWhich service would you like to schedule?"
@@ -80,10 +67,10 @@ SERVICE_MENU(){
       INSERT_APPOINTMENT=$($PSQL "INSERT INTO appointments(customer_id, service_id, time) VALUES($CUSTOMER_ID,$SERVICE_ID_SELECTED,'$SERVICE_TIME')")
 
       #get appointment info
-      SERVICE_NAME=$($PSQL "SELECT services.name from appointments INNER JOIN services USING(service_id) where customer_id=$CUSTOMER_ID AND service_id=$SERVICE_ID_SELECTED")
-      SERVICE_TIME=$($PSQL "SELECT time from appointments where customer_id=$CUSTOMER_ID AND service_id=$SERVICE_ID_SELECTED")
-
-      MAIN_MENU "I have put you down for a $SERVICE_NAME at $SERVICE_TIME, $CUSTOMER_NAME."
+      SERVICE_NAME=$($PSQL "SELECT services.name from appointments INNER JOIN services USING(service_id) where customer_id=$CUSTOMER_ID AND service_id=$SERVICE_ID_SELECTED and time='$SERVICE_TIME'")
+      SERVICE_TIME=$($PSQL "SELECT time from appointments where customer_id=$CUSTOMER_ID AND service_id=$SERVICE_ID_SELECTED and time='$SERVICE_TIME'")
+      echo -e "\nI have put you down for a $(echo $SERVICE_NAME | sed -r 's/^ *| *$//g') at $(echo $SERVICE_TIME| sed -r 's/^ *| *$//g'), $(echo $CUSTOMER_NAME | sed -r 's/^ *| *$//g')."
+      EXIT  
     fi
   fi
 }
